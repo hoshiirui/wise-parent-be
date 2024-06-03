@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('slug');
             $table->string('title');
+            $table->string('description');
             $table->string('writer')->default('Unknown Writer');
             $table->text('content');
             $table->string('thumbnail');

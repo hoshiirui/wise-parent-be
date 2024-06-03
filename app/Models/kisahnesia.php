@@ -10,6 +10,6 @@ class kisahnesia extends Model
     use HasFactory;
 
     protected $fillable = [
-        "slug", "title", "writer", "content", "tags", "thumbnail"
+        "slug", "title", "writer", "description", "content", "tags", "thumbnail"
     ];
 }

@@ -46,6 +46,7 @@ class kisahnesiaController extends Controller
         $kisahnesia = kisahnesia::create([
             'title' => $request->title,
             'writer' => $request->writer, 
+            'description' => $request->description,
             'content' => $request->content, 
             'slug' => Str::slug($request->title),
             'tags' => $request->tags,
