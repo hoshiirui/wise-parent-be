@@ -64,12 +64,32 @@ class kisahnesiaController extends Controller
         }
     }
 
-    public function allStory(){
-        $storylists = kisahnesia::all();
+    public function allStory(Request $request)
+    {
+        $search = $request->get('search'); // Optional search term
+        $sortBy = $request->get('sort', 'title'); // Default sort by title
+        $orderBy = $request->get('by', 'asc'); // Default order ascending
+        $limit = $request->get('limit', 10); // Default limit of 10 stories
+        $page = $request->get('page', 1); //get what page is that
+
+        $storylists = kisahnesia::select('*'); // Select all columns
+
+        if ($search) {
+            $storylists = $storylists->where('title', 'like', "%{$search}%")
+                                ->orWhere('content', 'like', "%{$search}%"); // Search title and content
+        }
+
+        $storylists = $storylists->orderBy($sortBy, $orderBy);
+
+        if ($limit) {
+            $storylists = $storylists->paginate($limit, $page);
+        } else {
+            $storylists = $storylists->get(); // Retrieve all stories if no limit provided
+        }
 
         return response()->json([
-            'message' => 'Succesfully retreived story datas!',
-            'story' => $storylists
+            'message' => 'Successfully retrieved story datas!',
+            'story' => $storylists,
         ], 200);
     }
 
