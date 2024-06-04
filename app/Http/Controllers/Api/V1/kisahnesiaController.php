@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\kisahnesia;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class kisahnesiaController extends Controller
@@ -67,6 +70,7 @@ class kisahnesiaController extends Controller
 
     public function allStory(Request $request)
     {
+        $tags = $request->get('tags'); //optional tags
         $search = $request->get('search'); // Optional search term
         $sortBy = $request->get('sort', 'title'); // Default sort by title
         $orderBy = $request->get('by', 'asc'); // Default order ascending
@@ -74,6 +78,15 @@ class kisahnesiaController extends Controller
         $page = $request->get('page', 1); //get what page is that
 
         $storylists = kisahnesia::select('*'); // Select all columns
+
+        if ($tags) {
+            $tagsArray = explode(',', $tags); // Split comma-separated tags
+            $storylists->where(function ($query) use ($tagsArray) {
+                foreach ($tagsArray as $tag) {
+                    $query->where('tags', 'like', "%{$tag}%"); // Filter by partial tag match
+                }
+            });
+        }
 
         if ($search) {
             $storylists = $storylists->where('title', 'like', "%{$search}%")
@@ -94,12 +107,26 @@ class kisahnesiaController extends Controller
         ], 200);
     }
 
-    public function aStory(string $slug){
-        $storylists = kisahnesia::where('slug', $slug)->first();
+    public function aStory(string $slug)
+    {
+        try {
+            $story = Kisahnesia::where('slug', $slug)->firstOrFail();
 
-        return response()->json([
-            'message' => 'Succesfully retreived story datas!',
-            'story' => $storylists
-        ], 200);
+            return response()->json([
+                'message' => 'Successfully retrieved story data!',
+                'story' => $story,
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Story not found.',
+            ], 404);
+        } catch (Exception $e) {
+            // Log the unexpected exception for debugging purposes
+            Log::error('Unexpected error retrieving story: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while retrieving the story.',
+            ], 500);
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\kisahnesiaController;
+use App\Http\Controllers\Api\V1\tagController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,7 +29,11 @@ Route::post('v1/auth/refresh', [AuthController::class, 'refresh']);
 Route::post('v1/auth/me', [AuthController::class, 'me']);
 
 Route::controller(kisahnesiaController::class)->group(function(){
-    Route::post('v1/kisahnesia/stories', 'allStory');
+    Route::get('v1/kisahnesia/stories', 'allStory');
     Route::get('v1/kisahnesia/story/{slug}', 'aStory');
     Route::post('v1/kisahnesia/create', 'newStory')->middleware('jwt.auth');
+});
+
+Route::controller(tagController::class)->group(function(){
+    Route::get('v1/tags', 'allTags');
 });
